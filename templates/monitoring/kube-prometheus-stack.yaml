@@ -1,0 +1,111 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 59.1.0
+    chart: kube-prometheus-stack
+    helm:
+      valuesObject:
+        prometheusOperator:
+          admissionWebhooks:
+            cert-manager:
+              enabled: true
+              issuerRef:
+                name: letsencrypt-prod
+                kind: ClusterIssuer
+        alertmanager:
+          ingress:
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+            enabled: true
+            ingressClassName: nginx
+            hosts:
+              - alertmanager.lunalovegood.dev
+            pathType: Prefix
+            path: /
+            tls:
+              - secretName: ssl-alertmanager.lunalovegood.dev
+                hosts:
+                  - alertmanager.lunalovegood.dev
+        grafana:
+          ingress:
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+            enabled: true
+            ingressClassName: nginx
+            hosts:
+              - grafana.lunalovegood.dev
+            path: /
+            tls:
+              - secretName: ssl-grafana.lunalovegood.dev
+                hosts:
+                  - grafana.lunalovegood.dev
+        prometheus:
+          prometheusSpec:
+            persistentVolumeClaimRetentionPolicy:
+              whenDeleted: Retain
+              whenScaled: Retain
+          ingress:
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+            enabled: true
+            ingressClassName: nginx
+            hosts:
+              - prometheus.lunalovegood.dev
+            pathType: Prefix
+            path:
+              - /
+            tls:
+              - secretName: ssl-prometheus.lunalovegood.dev
+                hosts:
+                  - prometheus.lunalovegood.dev
+  destination:
+    name: in-cluster
+    namespace: kube-prometheus-stack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=false
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana-dashboards-kubernetes
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    path: .
+    repoURL: https://github.com/dotdc/grafana-dashboards-kubernetes
+    targetRevision: HEAD
+  destination:
+    name: in-cluster
+    namespace: kube-prometheus-stack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - Replace=true

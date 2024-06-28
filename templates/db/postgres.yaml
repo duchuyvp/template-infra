@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-pv
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 10Gi
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-csi-retain
+  volumeMode: Filesystem
+  csi:
+    driver: nfs.csi.k8s.io
+    volumeAttributes:
+      server: 192.168.1.10
+      share: /kubedata
+      subDir: persistent-data/postgres # This is the directory in the shared folder on NFS server that I want it to create
+    volumeHandle: postgres-pv
+  mountOptions:
+    - nfsvers=4.1
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+type: Opaque
+data:
+  POSTGRES_USER: cm9vdA==
+  POSTGRES_PASSWORD: YWRtaW4=
+  POSTGRES_DB: b3JkZXJfc2VydmljZQ==
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: nfs-csi-retain
+  volumeMode: Filesystem
+  volumeName: postgres-pv
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: postgres-init-db
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS b3JkZXJfc2VydmljZQ==;
+    CREATE TABLE IF NOT EXISTS order_service;
+    CREATE TABLE IF NOT EXISTS payment_service;
+    CREATE TABLE IF NOT EXISTS user_service;
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:13
+          envFrom:
+            - secretRef:
+                name: postgres-secret
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-pv
+              mountPath: /var/lib/postgresql/data
+            - name: postgres-init-db
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: postgres-pv
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+        - name: postgres-init-db
+          configMap:
+            name: postgres-init-db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

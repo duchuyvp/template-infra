@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: cloudflared
+  name: cloudflared-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: cloudflared
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        pod: cloudflared
+    spec:
+      containers:
+      - command:
+        - cloudflared
+        - tunnel
+        - --metrics
+        - 0.0.0.0:2000
+        - run
+        args:
+        - --token
+        - eyJhIjoiMjMyYjMwOGEzNmJkOTgzNGFkYWQxMGFlNjFkMDI5YTciLCJ0IjoiN2JmODhlZTAtZTBhZC00ZGY0LWIyMGQtNDlmODBkOWNhMzIwIiwicyI6IllqSTFaVGs1Wm1ZdE1qUmlaaTAwT1RreUxXRTVaamd0TlRnME0yRXpObUU0WWpCaiJ9
+        image: cloudflare/cloudflared:latest
+        name: cloudflared
+        livenessProbe:
+          httpGet:
+            path: /ready
+            port: 2000
+          failureThreshold: 1
+          initialDelaySeconds: 10
+          periodSeconds: 10
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: httpbin-deployment
+# spec:
+#   selector:
+#     matchLabels:
+#       app: httpbin
+#   replicas: 2
+#   template:
+#     metadata:
+#       labels:
+#         app: httpbin
+#     spec:
+#       containers:
+#       - name: httpbin
+#         image: kennethreitz/httpbin:latest
+#         ports:
+#         - containerPort: 80
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: web-service
+# spec:
+#   selector:
+#     app: httpbin
+#   ports:
+#     - protocol: TCP
+#       port: 80
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: web-lunalovegood-2
+#   annotations:
+#     cert-manager.io/cluster-issuer: letsencrypt-prod
+# spec:
+#   ingressClassName: nginx
+#   rules:
+#   - host: web.lunalovegood.dev
+#     http:
+#       paths:
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: web-service
+#             port:
+#               number: 80
+#   tls:
+#   - hosts:
+#     - web.lunalovegood.dev
+#     secretName: web-lunalovegood-tls-2
