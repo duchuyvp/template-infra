@@ -1,0 +1,83 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/actions/actions-runner-controller-charts
+    targetRevision: 0.9.2
+    chart: gha-runner-scale-set-controller
+    helm:
+      releaseName: arc
+  destination:
+    name: in-cluster
+    namespace: arc-systems
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=false
+      - ServerSideApply=true
+      - ApplyOutOfSyncOnly=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc-runner-set
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    name: in-cluster
+    namespace: arc-runners
+  syncPolicy:
+    automated:
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - ServerSideApply=true
+      - ApplyOutOfSyncOnly=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
+
+  source:
+    repoURL: ghcr.io/actions/actions-runner-controller-charts
+    targetRevision: 0.9.2
+    chart: gha-runner-scale-set
+    helm:
+      releaseName: arc-runner-set
+      parameters:
+        - name: controllerServiceAccount.namespace
+          value: arc-systems
+        - name: controllerServiceAccount.name
+          value: arc-gha-rs-controller
+        - name: githubConfigUrl
+          value: https://github.com/tex-corver
+        - name: minRunners
+          value: "5"
+        - name: containerMode.type
+          value: dind
+        - name: githubConfigSecret
+          value: github-app-secret
