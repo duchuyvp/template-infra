@@ -1,0 +1,59 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: artifactory-jcr
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    name: in-cluster
+    namespace: artifactory-jcr
+  syncPolicy:
+    automated:
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - ServerSideApply=true
+      - ApplyOutOfSyncOnly=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
+
+  source:
+    repoURL: https://charts.jfrog.io
+    targetRevision: 107.84.16
+    chart: artifactory-jcr
+    helm:
+      releaseName: artifactory-jcr
+      valuesObject:
+        artifactory:
+          nginx:
+            enabled: false
+          artifactory:
+            persistence:
+              storageClassName: nfs-csi-registry
+              size: 100Gi
+              existingClaim: jcr-artifactory-pvc
+          postgresql:
+            postgresqlPassword: password
+            persistence:
+              size: 100Gi
+              existingClaim: jcr-postgresql-pvc
+          ingress:
+            enabled: true
+            className: nginx
+            hosts:
+              - jcr.lunalovegood.dev
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-body-size: "0"
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+            tls:
+              - secretName: jcr-tls
+                hosts:
+                  - jcr.lunalovegood.dev
