@@ -85,27 +85,4 @@ spec:
         factor: 2
         maxDuration: 3m
   revisionHistoryLimit: 3
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: grafana-dashboards-kubernetes
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-spec:
-  project: default
-  source:
-    path: .
-    repoURL: https://github.com/dotdc/grafana-dashboards-kubernetes
-    targetRevision: HEAD
-  destination:
-    name: in-cluster
-    namespace: kube-prometheus-stack
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - Replace=true
+

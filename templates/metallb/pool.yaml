@@ -1,0 +1,24 @@
+---
+# Starting from v0.13.0 configInline is no longer supported.
+# I have to run raw kubernetes manifest with IPAddressPool and L2Advertisement.
+# Stoobid. But works.
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: default-pool
+  namespace: metallb-system
+spec:
+  addresses:
+    - 192.168.1.100/32
+    # More addresses can be added here
+    # - 192.168.1.64/26
+---
+# https://metallb.universe.tf/configuration/#layer-2-configuration
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: default
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - default-pool
