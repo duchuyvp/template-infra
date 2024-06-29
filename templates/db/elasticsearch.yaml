@@ -24,6 +24,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: elasticsearch-pvc
+  namespace: persistent-data
 spec:
   accessModes:
     - ReadWriteOnce
@@ -38,6 +39,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: elasticsearch
+  namespace: persistent-data
   labels:
     app: elasticsearch
 spec:
@@ -75,6 +77,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: elasticsearch
+  namespace: persistent-data
   labels:
     app: elasticsearch
 spec:

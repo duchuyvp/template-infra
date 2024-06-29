@@ -24,6 +24,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: mysql-secret
+  namespace: persistent-data
 type: Opaque
 data:
   MYSQL_ROOT_PASSWORD: YWRtaW4=
@@ -33,6 +34,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mysql-pvc
+  namespace: persistent-data
 spec:
   accessModes:
     - ReadWriteOnce
@@ -47,6 +49,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: mysql-init-db
+  namespace: persistent-data
 data:
   init.sql: |
     CREATE DATABASE IF NOT EXISTS b3JkZXJfc2VydmljZQ==;
@@ -55,6 +58,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysql
+  namespace: persistent-data
   labels:
     app: mysql
 spec:
@@ -92,6 +96,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mysql
+  namespace: persistent-data
   labels:
     app: mysql
 spec:
