@@ -22,6 +22,7 @@ spec:
           "9300": "persistent-data/elasticsearch:9300"
           "6379": "persistent-data/redis-sentinel:6379"
           "26379": "persistent-data/redis-sentinel:26379"
+          "9000": "persistent-data/minio:9000"
   destination:
     name: in-cluster
     namespace: ingress-nginx

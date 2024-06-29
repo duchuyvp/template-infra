@@ -16,6 +16,7 @@ Currently, the following services and port respectively are provided:
 - `Redis sentinel: 26379`
 - `Elasticsearch: 9200`
 - `Other Elasticsearch: 9300` (I don't know what this is,  but anyway)
+- `MinIO: 9000`
 
 ### Example
 
