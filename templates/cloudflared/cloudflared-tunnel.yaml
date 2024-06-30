@@ -1,10 +1,15 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cloudflared
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     app: cloudflared
   name: cloudflared-deployment
-  namespace: default
+  namespace: cloudflared
 spec:
   replicas: 2
   selector:
