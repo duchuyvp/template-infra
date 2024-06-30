@@ -6,7 +6,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   capacity:
-    storage: 100Gi
+    storage: 10Gi
   persistentVolumeReclaimPolicy: Retain
   storageClassName: nfs-csi-registry
   volumeMode: Filesystem
@@ -30,7 +30,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 100Gi
+      storage: 10Gi
   storageClassName: nfs-csi-registry
   volumeMode: Filesystem
   volumeName: jcr-postgresql-pv
