@@ -20,17 +20,17 @@ spec:
   mountOptions:
     - nfsvers=4.1
 ---
-# apiVersion: v1
-# kind: PersistentVolumeClaim
-# metadata:
-#   name: jcr-postgresql-pvc
-#   namespace: artifactory-jcr
-# spec:
-#   accessModes:
-#     - ReadWriteOnce
-#   resources:
-#     requests:
-#       storage: 10Gi
-#   storageClassName: nfs-csi-registry
-#   volumeMode: Filesystem
-#   volumeName: jcr-postgresql-pv
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jcr-postgresql-pvc
+  namespace: artifactory-jcr
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: nfs-csi-registry
+  volumeMode: Filesystem
+  volumeName: jcr-postgresql-pv
