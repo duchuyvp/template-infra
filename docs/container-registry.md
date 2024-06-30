@@ -22,3 +22,7 @@ docker pull jcr.lunalovegood.dev/docker/<image-name>:<tag>
 docker tag <image-id> jcr.lunalovegood.dev/docker/<image-name>:<tag>
 docker push jcr.lunalovegood.dev/docker/<image-name>:<tag>
 ```
+
+### Additional Information
+
+The container registry is hosted at `jcr.lunalovegood.dev` also supports for `helm` and `oci` repo. You can figure out by yourself.
