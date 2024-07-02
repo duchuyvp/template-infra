@@ -108,7 +108,7 @@ Now, you can access to service `web-service` by `http://<node-ip>:32430` from ev
 
 #### Limitation
 
-- You need to know the IP address of the node where the service is running.
+- You need to know the IP address of the node
 - NodePort is limited
 
 ### 4. Using Ingress (Recommended)
@@ -123,9 +123,8 @@ kind: Ingress
 metadata:
   name: web-ingress
 spec:
-  ingressClassName: nginx
   rules:
-    - host: web.hoaem.vn
+    - host: web.domain.example
       http:
         paths:
           - path: /
@@ -137,39 +136,16 @@ spec:
                   number: 80
 ```
 
-Now, you can access to service `web-service` by `http://web.hoaem.vn` from everywhere in the world.
+Make sure to update your `/etc/hosts` file on machine in LAN you want to access to k8s service to resolve web.domain.example to the external IP address of your k8s node.
 
-This way required you have a domain and may not work for all domain because some specific domain require TLS certificate and auto redirect to `https` (.dev, etc.), but currently, I use free TLS certificate by Cloudflare to secure the connection so you can feel free without TLS.
-Many providers do not provide free TLS certificate or simply you don't trust Cloudflare, you can generate and add your own TLS certificate to Ingress (I'm using Let's Encrypt).
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: web-ingress
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-spec:
-  ingressClassName: nginx
-  rules:
-    - host: web.hoaem.vn
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: web-service
-                port:
-                  number: 80
-  tls:
-    - hosts:
-        - web.hoaem.vn
-      secretName: web-hoaem-vn-tls
+To check the external IP assigned to the service:
+  
+```bash
+echo "192.168.1.10 web.domain.example" | sudo tee -a /etc/hosts
 ```
+
+Now, you can access to service `web-service` by `http://web.domain.example` from everywhere in LAN.
 
 #### Limitation
 
-- You need to have a domain.
-- Cloudflare restricts to use their TLS certificate and only free for *.hoaem.vn, hoaem.vn. All other common names will be charged.
-- Service is publicly accessible.
+- You need to know the IP address of the node
