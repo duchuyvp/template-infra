@@ -1,50 +1,59 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: httpbin-deployment
+  name: lunalovegood-deployment
   namespace: default
 spec:
   selector:
     matchLabels:
-      app: httpbin
+      app: lunalovegood
   replicas: 2
   template:
     metadata:
       labels:
-        app: httpbin
+        app: lunalovegood
     spec:
       containers:
-        - name: httpbin
-          image: kennethreitz/httpbin:latest
+        - name: lunalovegood
+          image: jcr.lunalovegood.dev/docker/template-service:7a9840c65225f33a2f8d8cf6dab5f5d6ed909be7
           ports:
-            - containerPort: 80
+            - containerPort: 8000
+      imagePullSecrets:
+        - name: jcr-image-pull-secret
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: web-service
+  name: lunalovegood-service
   namespace: default
 spec:
   selector:
-    app: httpbin
+    app: lunalovegood
   ports:
     - protocol: TCP
       port: 80
+      targetPort: 8000
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: web-ingress
-  namespace: default
+  name: lunalovegood-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
+  ingressClassName: nginx
   rules:
-    - host: web.domain.example
+    - host: lunalovegood.dev
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: web-service
+                name: lunalovegood-service
                 port:
                   number: 80
+  tls:
+    - hosts:
+        - lunalovegood.dev
+      secretName: lunalovegood-dev-tls
