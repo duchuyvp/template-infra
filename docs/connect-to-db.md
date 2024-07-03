@@ -2,7 +2,7 @@
 
 ### 1. What is Local Network I am talking about?
 
-If you are using a computer that connected to wifi or LAN in Long's house, then you are in the Local Network. If you are using a computer that connected to the internet in a coffee shop or your house (if you're not Long), then you are not in the Local Network.
+If you are using a computer that connected to wifi or LAN in my house, then you are in the Local Network. If you are using a computer that connected to the internet in a coffee shop or your house, then you are not in the Local Network.
 
 ### 2. Connecting to the database from inside Local Network
 
@@ -87,6 +87,6 @@ engine.execute("SELECT * FROM table_name")
 
 ### 4. Credentials and Permissions
 
-You will need the credentials to connect to databases. Please contact Long for the credentials.
+You will need the credentials to connect to databases. Please contact me for the credentials.
 
 Once you have the credentials, you can connect to the database and do anything you want (create database, even drop the database, etc.). I haven't set up any limit permission yet, but I will do it in the future.

@@ -16,6 +16,26 @@ docker login jcr.lunalovegood.dev -u <username> -p <password or token>
 docker pull jcr.lunalovegood.dev/docker/<image-name>:<tag>
 ```
 
+#### Pull image in Kubernetes
+  
+Specifying `imagePullSecrets` on a Pod (or Deployment, StatefulSet, or any workload)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hoaem-fe-prod
+spec:
+  containers:
+  - name: hoaem-fe-prod
+    image: jcr.lunalovegood.dev/docker/hoaem-fe:latest
+  
+  imagePullSecrets:
+  - name: jcr-image-pull-secret
+```
+
+You can see I use secret `jcr-image-pull-secret` and may wonder where this secret comes from. It is (*They are*) created when I deploy private registry and you can use it to pull images from the registry on every current and future namespaces.
+
 ### 3. Push images
 
 ```bash

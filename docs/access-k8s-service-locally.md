@@ -149,3 +149,66 @@ Now, you can access to service `web-service` by `http://web.domain.example` from
 #### Limitation
 
 - You need to know the IP address of the node
+
+### 5. Using Ingress with TLS (Recommended)
+
+Same as above, but with TLS certificate.
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-ingress-tls
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: web.lunalovegood.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web-service
+                port:
+                  number: 80
+```
+
+You see I use `ingressClassName: nginx` which mean every request to `web.lunalovegood.dev` will be handled by `ingress-nginx` service before routing to `web-service`. So make sure `nslookup web.lunalovegood.dev` return the external IP address of `ingress-nginx` service
+
+Now, you can access to service `web-service` by `http://web.lunalovegood.dev` from everywhere in the world.
+
+This way required you have a domain and may not work for all domain because some specific domain require TLS certificate and auto redirect to `https` (.dev, etc.), but currently, I use free TLS certificate by Cloudflare to secure the connection so you can feel free without TLS.
+Many providers do not provide free TLS certificate or simply you don't trust Cloudflare, you can generate and add your own TLS certificate to Ingress (I'm using Let's Encrypt).
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: web.lunalovegood.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web-service
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - web.lunalovegood.dev
+      secretName: web-hoaem-vn-tls
+```
+
+#### Limitation
+
+- You need to have a domain.
+- Cloudflare restricts to use their TLS certificate and only free for *.lunalovegood.dev, lunalovegood.dev. All other common names will be charged.
+- Service is publicly accessible.
