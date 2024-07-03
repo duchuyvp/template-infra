@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: lunalovegood
-          image: jcr.lunalovegood.dev/docker/template-service:7a9840c65225f33a2f8d8cf6dab5f5d6ed909be7
+          image: jcr.lunalovegood.dev/docker/template-service:ad007c586f78c4622d0208b5dcd84e5af8d78408
           ports:
             - containerPort: 8000
       imagePullSecrets:
